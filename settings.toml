@@ -1,0 +1,9 @@
+#WIFI_SSID = "SHAW-892B"
+#WIFI_PASSWORD = "eagle3127beside"
+
+WIFI_SSID = "NOVAPixelPro"
+WIFI_PASSWORD = "SuraDiha"
+
+
+#telegram
+botToken = "6844707988:AAFVAwaQb4Az2KoXOPTu2hjvbQovEyPrZp0"
