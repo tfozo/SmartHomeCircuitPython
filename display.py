@@ -21,18 +21,20 @@ lcd = LCD(I2CPCF8574Interface(busio.I2C(board.GP1, board.GP0), 0x27), num_rows=2
 def marquee(text, row, width, delay):
     padded_text = ' ' * width + text + ' ' * width  # Add spaces before and after the text
     for i in range(len(padded_text) - width):
-        lcd.clear()  # Clear the display to prevent overlapping characters
+        lcd.clear() 
         lcd.set_cursor_pos(row, 0)
         lcd.print(padded_text[i:i+width])  # Print a substring of the text
         time.sleep(delay)
         if i == len(padded_text) - width - 1:
             i = width  # Reset the counter to start the marquee again
 
-def quicktext(text):
+
+
+def quicktext(text,delay):
     lcd.clear()
     lcd.set_cursor_pos(1,0)
     lcd.print(text)
-    time.sleep(3)
+    time.sleep(delay)
     lcd.clear()
 # Assuming your LCD is 16 columns wide
 #marquee("This is quite long and will wrap onto the next line automatically.", 0, 16, 0.3)

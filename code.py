@@ -20,7 +20,7 @@ import simpleio
 import adafruit_requests
 import ssl
 import json
-from display import marquee, quicktext
+from display import marquee,quicktext
 #from joke import get_dad_joke
 
 # Get wifi details from a settings.toml file
@@ -28,6 +28,7 @@ print(os.getenv("test_env_file"))
 ssid = os.getenv("WIFI_SSID")
 password = os.getenv("WIFI_PASSWORD")
 telegrambot = os.getenv("botToken")
+weatherAPI = os.getenv("weatherAPI")
 
 # Telegram API url.
 API_URL = "https://api.telegram.org/bot" + telegrambot
@@ -49,6 +50,8 @@ led.direction = digitalio.Direction.OUTPUT
 
 update_id = 0  # Initialize update_id
 
+    
+
 def fetch_latest_update_id():
     global update_id
     get_url = API_URL + "/getUpdates?limit=1&offset=-1"  # Request the latest update
@@ -58,6 +61,24 @@ def fetch_latest_update_id():
             update_id = r.json()['result'][0]['update_id']
     except (IndexError, KeyError):
         print("No new updates or error fetching the latest update_id")
+
+def get_dad_joke():
+    url = "https://icanhazdadjoke.com/"
+    headers = {'Accept': 'application/json'}
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:  # HTTP OK
+            joke = response.json().get('joke', 'No joke found.')
+        else:
+            joke = "Failed to fetch joke - server returned non-OK status."
+    except Exception as e:
+        print(f"Failed to fetch joke due to an error: {e}")
+        joke = "Failed to fetch joke due to a network or connection error."
+    return joke    
+
+
+
+
 
 
 def init_bot():
@@ -111,10 +132,39 @@ print("IP Address: {}".format(wifi.radio.ipv4_address))
 print("Connecting to WiFi '{}' ... ".format(ssid), end="")
 requests = adafruit_requests.Session(pool, ssl.create_default_context())
 
+
+#weather
+def get_weather_by_city(city_name):
+    api_key = weatherAPI  
+    base_url = "http://api.openweathermap.org/data/2.5/weather?"
+    complete_url = f"{base_url}appid={api_key}&q={city_name}&units=metric"  # 'units=metric' to get temperature in Celsius
+    response = requests.get(complete_url)
+    if response.status_code == 200:
+        data = response.json()
+        main_data = data['main']
+        temperature = main_data['temp']
+        weather_description = data['weather'][0]['description']
+        return temperature, weather_description
+    else:
+        return None, None
+
+waiting_for_city = False  # New state variable to track if we're waiting for a city name
+last_chat_id = None  # Keep track of the last chat ID to respond correctly
+
+
+def handle_city_temp_request(chat_id):
+    global waiting_for_city, last_chat_id
+    send_message(chat_id, "Which City? Text me the name.")
+    waiting_for_city = True  # Set the flag to true as we're now waiting for a city name
+    last_chat_id = chat_id  # Remember the chat ID to respond to later
+
+
+
 if init_bot() == False: #if bot initialization fails
     print("\nTelegram bot initialization failed.")
 else:
     print("\nTelegram bot ready!\n")
+   #print(get_dad_joke())
     simpleio.tone(board.GP18, NOTE_G4, duration=0.1)
     simpleio.tone(buzzer, NOTE_C5, duration=0.1)
     fetch_latest_update_id()
@@ -127,11 +177,23 @@ while True:
             
         chat_id, message_in, user_name = read_message()
         if chat_id and message_in:
-            if message_in == "/start":
+            if waiting_for_city:
+                # If we're waiting for a city name, assume the next message is the city
+                city_name = message_in  # The city name is the current message
+                temperature, description = get_weather_by_city(city_name)
+                if temperature is not None and description is not None:
+                    response_message = f"{city_name}: {temperature}°C {description}"
+                else:
+                    response_message = "Can't find city."
+                send_message(chat_id, response_message)
+                marquee(response_message, 0, 16, 0.3)
+                waiting_for_city = False
+                
+            elif message_in == "/start":
                 greet_msg = f"Welcome Home {user_name}! Choose an option:" #TODO: greet by name
                 
                 keyboard = {
-                    "keyboard": [[{"text": "LED ON"}, {"text": "LED OFF"}], [{"text": "Local TEMP"},{"text": "City TEMP"},{"text": "CPU TEMP"}],[{"text": "Dad Jokes"}]],
+                    "keyboard": [[{"text": "LED ON"}, {"text": "LED OFF"}], [{"text": "City TEMP"},{"text": "CPU TEMP"}],[{"text": "Dad Jokes"}]],
                     "resize_keyboard": True,
                     "is_persistent":True,
                 }
@@ -141,20 +203,22 @@ while True:
             elif message_in == "LED ON":
                 led.value = True
                 send_message(chat_id, "LED turned on.")
-                quicktext('Light On')
+                quicktext('Light On',1)
             elif message_in == "LED OFF":
                 led.value = False
                 send_message(chat_id, "LED turned off.")
-                quicktext('Light Off')
+                quicktext('Light Off',1)
+            elif message_in == "City TEMP":
+                handle_city_temp_request(chat_id)        
             elif message_in == "CPU TEMP":
                 temp = readIntTemp()
                 send_message(chat_id, temp)
-                quicktext(f'CPU: {temp[13:18]} *C') #default deg(symbol) becomes '-' thus I had to interfere
+                quicktext(f'CPU: {temp[13:18]} *C',2) #default deg(symbol) becomes '-' thus I had to interfere
                 #marquee("LED is on my boy!", 0, 16, 0.3)
             elif message_in == "Dad Jokes":
-                #joke = get_dad_joke()
-                send_message(chat_id, "JOKE")
-                #marquee("LED is on my boy!", 0, 16, 0.3)
+                joke = get_dad_joke()
+                send_message(chat_id, joke)
+                marquee(joke, 0, 16, 0.3)
             else:
                 send_message(chat_id, "Command is not available.")
         else:
