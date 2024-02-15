@@ -1,0 +1,75 @@
+https://api.openweathermap.org/data/2.5/weather?q=London&appid=9044c8a3784f6e27fe5a2053eda028f6
+
+ "coord": {
+        "lon": 38.4667,
+        "lat": 7.05
+    },
+    "weather": [
+        {
+            "id": 500,
+            "main": "Rain",
+            "description": "light rain",
+            "icon": "10d"
+        }
+    ],
+    "base": "stations",
+    "main": {
+        "temp": 297.9,
+        "feels_like": 297.74,
+        "temp_min": 297.9,
+        "temp_max": 297.9,
+        "pressure": 1016,
+        "humidity": 50,
+        "sea_level": 1016,
+        "grnd_level": 839
+    },
+    "visibility": 10000,
+    "wind": {
+        "speed": 4.92,
+        "deg": 360,
+        "gust": 3.86
+    },
+    "rain": {
+        "1h": 0.26
+    },
+    "clouds": {
+        "all": 61
+    },
+    "dt": 1707469074,
+    "sys": {
+        "country": "ET",
+        "sunrise": 1707450266,
+        "sunset": 1707492978
+    },
+    "timezone": 10800,
+    "id": 343137,
+    "name": "Awasa",
+    "cod": 200
+}
+
+1. Temperature Visualization
+Use the temperature value (main.temp) to control the color of LEDs. For instance, cooler temperatures could be represented by blue LEDs, moderate temperatures by green, and warmer temperatures by red. You can create a gradient effect where the color transitions smoothly based on the current temperature.
+2. Rainfall Indicator
+Utilize the rain information (rain.1h) to activate a specific set of LEDs or create a raindrop effect on an LED strip. The intensity of the rain could determine the speed or brightness of the effect, with light rain causing slow, dim droplets and heavier rain resulting in faster, brighter droplets.
+3. Wind Speed Visualizer
+Reflect the wind speed (wind.speed) in the animation speed of a set of LEDs. For example, a calm day could be shown with a gentle, slow-moving pattern, while a windy day could have fast, sweeping animations across your LEDs.
+4. Cloudiness Indicator
+Use the cloudiness percentage (clouds.all) to control the brightness or opacity of your LEDs. A clear sky (0% cloudiness) could result in fully bright LEDs, while an overcast day (100% cloudiness) could dim the lights or make them appear softer.
+5. Sunrise and Sunset Simulation
+With the sunrise (sys.sunrise) and sunset (sys.sunset) times, you can simulate the natural lighting conditions of the day. Gradually increase the brightness and color temperature of the LEDs to mimic sunrise, and reverse the process for sunset, creating a natural light cycle based on the actual solar schedule of the location.
+6. Weather Condition Effects
+Use the main weather conditions (weather[0].main and weather[0].description) to trigger specific lighting patterns or effects. For example:
+Clear: A steady, bright light.
+Clouds: A soft, diffused glow.
+Rain: A dynamic, dripping effect.
+Thunderstorm: Occasional flashes of white light to simulate lightning.
+
+
+
+Clear: Clear sky.
+Clouds: Few clouds, scattered clouds, broken clouds, overcast clouds.
+Rain: Light rain, moderate rain, heavy intensity rain, etc.
+Snow: Light snow, Snow, Heavy snow, etc.
+Thunderstorm: Thunderstorm with light rain, thunderstorm with heavy rain, etc.
+Drizzle: Light intensity drizzle, heavy intensity drizzle, etc.
+Atmosphere: Mist, Smoke, Haze, sand/ dust whirls, fog, sand, dust, volcanic ash, squalls, tornado.

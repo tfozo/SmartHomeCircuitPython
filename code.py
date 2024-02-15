@@ -21,6 +21,7 @@ import adafruit_requests
 import ssl
 import json
 from display import marquee,quicktext
+from neo import light,clear_sky,rain,cloudy,snow_fall,thunder,danger
 #from joke import get_dad_joke
 
 # Get wifi details from a settings.toml file
@@ -36,16 +37,6 @@ API_URL = "https://api.telegram.org/bot" + telegrambot
 # Buzzer
 
 buzzer = board.GP18
-
-#buzzer = digitalio.DigitalInOut(board.GP18)
-#buzzer.direction = digitalio.Direction.OUTPUT
-
-# Input-Output Initialization
-led = digitalio.DigitalInOut(board.LED)
-led.direction = digitalio.Direction.OUTPUT
-
-#led0 = digitalio.DigitalInOut(board.GP0)
-#led0.direction = digitalio.Direction.OUTPUT
 
 
 update_id = 0  # Initialize update_id
@@ -143,10 +134,12 @@ def get_weather_by_city(city_name):
         data = response.json()
         main_data = data['main']
         temperature = main_data['temp']
+        weather_id = data['weather'][0]['id'] #will use this for my lights show
         weather_description = data['weather'][0]['description']
-        return temperature, weather_description
+        
+        return temperature, weather_description, weather_id
     else:
-        return None, None
+        return None, None, None
 
 waiting_for_city = False  # New state variable to track if we're waiting for a city name
 last_chat_id = None  # Keep track of the last chat ID to respond correctly
@@ -164,7 +157,6 @@ if init_bot() == False: #if bot initialization fails
     print("\nTelegram bot initialization failed.")
 else:
     print("\nTelegram bot ready!\n")
-   #print(get_dad_joke())
     simpleio.tone(board.GP18, NOTE_G4, duration=0.1)
     simpleio.tone(buzzer, NOTE_C5, duration=0.1)
     fetch_latest_update_id()
@@ -180,14 +172,31 @@ while True:
             if waiting_for_city:
                 # If we're waiting for a city name, assume the next message is the city
                 city_name = message_in  # The city name is the current message
-                temperature, description = get_weather_by_city(city_name)
+                temperature, description, weather_id = get_weather_by_city(city_name)
                 if temperature is not None and description is not None:
-                    response_message = f"{city_name}: {temperature}°C {description}"
+                    response_message = f"{city_name}: {temperature}*C {description}"
                 else:
                     response_message = "Can't find city."
                 send_message(chat_id, response_message)
                 marquee(response_message, 0, 16, 0.3)
                 waiting_for_city = False
+                #light,clear_sky,rain,cloudy,snow_fall
+                if weather_id == 800:
+                    clear_sky()
+                elif weather_id in [300,301,302,310,311,312,313,314,321,500,501,511,520,521,531]: #applies for [entire drizzle family] light, moderate, freezing, light intensity shower, shower,ragged
+                    rain(0.3,0)
+                elif weather_id in [502,503,504,522,200,201,202,230,231,232]: #applies for heavy intensity,very heavy,extreme,heavy intensity shower ,[thunderstorm with all rain and all drizzle]
+                    rain(0.7,0.5)
+                elif weather_id in [210,211,212,221]: #all thunder with out rain and drizzle (thunder only)
+                    thunder(0.4)
+                elif weather_id in [600,601,611,612,613,615,616,620,621]:#snow light,snow,sleet,light shower, shower, with light rain, rain and snow
+                    snow_fall(.6, .3)
+                elif weather_id in [602,622]:
+                    snow_fall(.3, .8) #snow fall speed and intensity (amount)
+                elif weather_id in [801,802,803,804]:
+                    cloudy()
+                else:
+                    danger()                
                 
             elif message_in == "/start":
                 greet_msg = f"Welcome Home {user_name}! Choose an option:" #TODO: greet by name
@@ -201,12 +210,12 @@ while True:
                 simpleio.tone(board.GP18, NOTE_G4, duration=0.1)
                 simpleio.tone(board.GP18, NOTE_C5, duration=0.1)
             elif message_in == "LED ON":
-                led.value = True
-                send_message(chat_id, "LED turned on.")
+                light(1)
+                send_message(chat_id, "Light on.")
                 quicktext('Light On',1)
             elif message_in == "LED OFF":
-                led.value = False
-                send_message(chat_id, "LED turned off.")
+                light(0)
+                send_message(chat_id, "Light off.")
                 quicktext('Light Off',1)
             elif message_in == "City TEMP":
                 handle_city_temp_request(chat_id)        

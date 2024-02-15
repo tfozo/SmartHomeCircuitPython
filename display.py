@@ -27,6 +27,7 @@ def marquee(text, row, width, delay):
         time.sleep(delay)
         if i == len(padded_text) - width - 1:
             i = width  # Reset the counter to start the marquee again
+    lcd.clear()
 
 
 
