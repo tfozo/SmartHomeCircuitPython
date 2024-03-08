@@ -1,4 +1,4 @@
-https://api.openweathermap.org/data/2.5/weather?q=London&appid=9044c8a3784f6e27fe5a2053eda028f6
+https://api.openweathermap.org/data/2.5/weather?q=London&appid=[APIKEY-FROM-OPENWEATHERMAP]
 
  "coord": {
         "lon": 38.4667,

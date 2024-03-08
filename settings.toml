@@ -6,6 +6,6 @@ WIFI_PASSWORD = "SuraDiha"
 
 
 #telegram
-botToken = "6844707988:AAFVAwaQb4Az2KoXOPTu2hjvbQovEyPrZp0"
+botToken = "YOUR TELEGRAM BOT TOKEN"
 #weather
-weatherAPI = "9044c8a3784f6e27fe5a2053eda028f6"
+weatherAPI = "Your Weather-API-KEY"
