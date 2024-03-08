@@ -34,6 +34,19 @@ To get started with SmartHomeCircuitPython, follow these simple steps:
 
 5. **Enjoy**: Engage with the atmospheric simulations, exploring varied weather phenomena from across the globe.
 
+## Build Setup
+
+**Telegram Bot Interface**
+![Telegram Bot](images/1.jpg)
+
+**Assembling 3D-Printed Build**
+![Assembling](images/2.jpg)
+![Assembling](images/3.jpg)
+![Assembling](images/4.jpg)
+![Assembling](images/5.jpg)
+**Clear Sky Simulation**
+![Assembling](images/6.jpg)
+
 ## Support
 
 Should you encounter any issues or have any questions, please feel free to reach out to our support team. We are dedicated to providing assistance and ensuring your experience with SmartHomeCircuitPython is nothing short of fantastic.
