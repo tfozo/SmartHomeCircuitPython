@@ -69,16 +69,21 @@ def read_message(): #we heavily relied on the Telegram Bot API documentation for
         if r.json()['result']:
             update = r.json()['result'][0]
             update_id = update['update_id'] 
-            message = update['message']['text']
-            chat_id = update['message']['chat']['id']
-            first_name = update['message']['from'].get('first_name', '')
-            #I couln't see what was happening when I was debugging the code and I still want this to show on the console to debug...
-            print(f"Chat ID: {chat_id} Update_id: {update_id} Message: {message}")
-            
-            return chat_id, message, first_name  # Return chat ID and message
+            if 'message' in update:
+                message = update['message']['text']
+                chat_id = update['message']['chat']['id']
+                first_name = update['message']['from'].get('first_name', '')
+                print(f"Message - Chat ID: {chat_id} Update_id: {update_id} Message: {message}")
+                return chat_id, message, first_name, None  # Added a None here for consistency
+            elif 'callback_query' in update:
+                message = update['callback_query']['data']  # This is the data from the button.
+                chat_id = update['callback_query']['message']['chat']['id']
+                message_id = update['callback_query']['message']['message_id']
+                print(f"Callback Query - Chat ID: {chat_id} Update_id: {update_id} Message: {message}")
+                return chat_id, message, None, message_id  # message_id is needed for editing messages
     except (IndexError, KeyError):
         print("No new messages or error parsing response")
-    return False, False, ''
+    return False, False, '', None
 
 #This is circuit python documentation, we don't really fully understand what it is for
 #BUT if it works don't touch it! lol :)
@@ -123,7 +128,7 @@ while True:
             print(f"Reconnecting to WiFi...")
             wifi.radio.connect(ssid, password) #Doc
             
-        chat_id, message_in, user_name = read_message()
+        chat_id, message_in, user_name, message_id = read_message()
         if chat_id and message_in:
             if message_in == "/start":
                 greet_msg = f"Hello {user_name}! Choose an option:" #TODO: greet by name
@@ -137,10 +142,24 @@ while True:
                 simpleio.tone(board.GP19, NOTE_G4, duration=0.1)
                 simpleio.tone(board.GP19, NOTE_C5, duration=0.1)
             if message_in == "Study Mode":
-                #bare minimum code
-                #
-                #write ur things here
+                caption_text = "Unlock productivity with Pomodoro! Choose your focus journey!"
+                inline_keyboard = {
+                    "inline_keyboard": [
+                        [{"text": "30' study - 5' break", "callback_data": "30-5"}],[{"text": "60' study - 10' break", "callback_data": "60-10"}]
+                    ]
+                }
+                send_message(chat_id, caption_text, reply_markup=json.dumps(inline_keyboard))
                 
+            elif message_in == "30-5" and message_id:
+            # This is where you handle the callback for the inline keyboard
+            #TODO: screen countdown function for 30-5
+                send_message(chat_id, "Pomodoro timer confirmed for 30'-5'. Tunnel vision!")
+                
+            elif message_in == "60-10" and message_id:
+            # This is where you handle the callback for the inline keyboard
+            #TODO: screen countdown function for 60-10
+                send_message(chat_id, "Pomodoro timer confirmed for 60'-10'. Tunnel vision!")
+            
             else:
                 send_message(chat_id, "Command is not available.")
         else:
