@@ -5,7 +5,6 @@ SmartHomeSystem with Telegram Bot and using CircuitPython on Raspberry Pi Pico W
 In this page we used 
   https://circuitpython.org/libraries
   - adafruit_requests.mpy - for http request of our API's
-  - simpleio.mpy - for default settings
   - neopixel.mpy -  for our LED
 
 Our team decided to make the project initially as a remotely controlled IOT system so
@@ -25,7 +24,6 @@ import time
 import microcontroller
 import board
 import digitalio
-import simpleio
 import adafruit_requests
 import ssl
 import json
@@ -105,10 +103,6 @@ def read_message(): #we heavily relied on the Telegram Bot API documentation for
         print("No new messages or error parsing response")
     return False, False, ''
 
-#This is circuit python documentation, we don't really fully understand what it is for
-#BUT if it works don't touch it! lol :)
-NOTE_G4 = 392
-NOTE_C5 = 523
 
 #sending message from telegram bot to the raspberry pi pico again Telegram Bot API
 def send_message(chat_id, message, reply_markup=None): #sends message via chatid based on the message request
@@ -170,9 +164,6 @@ if init_bot() == False: #if bot initialization fails
     print("\nTelegram bot initialization failed.")
 else:
     print("\nTelegram bot ready!\n")
-    #again part of the CircuitPython Documentation it works don't touch it.
-    simpleio.tone(board.GP18, NOTE_G4, duration=0.1)
-    simpleio.tone(buzzer, NOTE_C5, duration=0.1)
     fetch_latest_update_id()
 
 while True:
@@ -223,8 +214,7 @@ while True:
                     "is_persistent":True,
                 }
                 send_message(chat_id, greet_msg, reply_markup=json.dumps(keyboard))
-                simpleio.tone(board.GP18, NOTE_G4, duration=0.1)
-                simpleio.tone(board.GP18, NOTE_C5, duration=0.1)
+
             elif message_in == "LED ON":
                 light(1)
                 send_message(chat_id, "Light on.")
