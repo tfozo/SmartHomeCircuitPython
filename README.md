@@ -54,5 +54,3 @@ Should you encounter any issues or have any questions, please feel free to reach
 ## License
 
 SmartHomeCircuitPython is released under the MIT license. For more information, please refer to the LICENSE file in the repository.
-
-Thank you for exploring SmartHomeCircuitPython. We hope you enjoy using it as much as we enjoyed developing it!
